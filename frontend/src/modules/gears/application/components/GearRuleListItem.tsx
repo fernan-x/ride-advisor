@@ -6,6 +6,7 @@ import { Gear } from "../../domain/gear.domain";
 import { DeleteGearRuleModal } from "./DeleteGearRuleModal";
 import { useDisclosure } from "@mantine/hooks";
 import { useMutationDeleteGearRule } from "../mutations/useMutationDeleteGearRule";
+import { AddGearRuleModal } from "./AddGearRuleModal";
 
 type GearRuleListItemProps = {
   rule: GearRule;
@@ -14,8 +15,10 @@ type GearRuleListItemProps = {
 export const GearRuleListItem = ({ rule, gears }: GearRuleListItemProps) => {
   const [showDeleteModal, { open: openDeleteModal, close: closeDeleteModal }] =
     useDisclosure(false);
+  const [showAddModal, { open: openAddModal, close: closeAddModal }] =
+    useDisclosure(false);
 
-    const { deleteGearRule, isPending } = useMutationDeleteGearRule();
+  const { deleteGearRule, isPending } = useMutationDeleteGearRule();
 
   const ruleDescription = getRuleDescription(rule, gears);
 
@@ -28,16 +31,17 @@ export const GearRuleListItem = ({ rule, gears }: GearRuleListItemProps) => {
         ruleDescription={ruleDescription}
         isLoading={isPending}
       />
+      <AddGearRuleModal
+        show={showAddModal}
+        onClose={closeAddModal}
+        onConfirm={(rule: GearRule) => console.log("add rule", rule)}
+        gearRule={rule}
+        isLoading={isPending}
+      />
       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
         <span className="text-gray-700">{ruleDescription}</span>
         <Group gap="sm">
-          <ActionIcon
-            variant="subtle"
-            onClick={() => console.log("delete rule")}
-            color="indigo"
-            size="sm"
-            data-disabled
-          >
+          <ActionIcon variant="subtle" onClick={openAddModal} size="sm">
             <Pencil className="w-4 h-4" />
           </ActionIcon>
           <ActionIcon

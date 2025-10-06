@@ -23,10 +23,12 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <DependenciesProvider>
-        <MantineProvider>
+        <MantineProvider
+          theme={{ primaryColor: "indigo", defaultRadius: "md" }}
+        >
           <RouterProvider router={router} />
         </MantineProvider>
       </DependenciesProvider>
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 );
