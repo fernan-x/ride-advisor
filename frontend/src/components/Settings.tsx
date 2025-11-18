@@ -1,44 +1,15 @@
 import { useEffect, useState } from "react";
 import { Save, MapPin } from "lucide-react";
-import {
-  getAllGear,
-  getUserCity,
-  updateUserCity,
-} from "../lib/gearRecommendation";
-import { getCityList } from "../lib/weather";
+import { DEFAULT_CITY, getCityList } from "../lib/weather";
 import { GearList } from "../modules/gears/application/components/GearList";
 import { GearRuleList } from "@/modules/gears/application/components/GearRuleList";
 
 export default function Settings() {
-  const [selectedGear, setSelectedGear] = useState<string>("");
-  const [city, setCity] = useState<string>("Nantes");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [city, setCity] = useState<string>(DEFAULT_CITY);
+  const [loading, _setLoading] = useState(false);
+  const [saving, _setSaving] = useState(false);
 
   const cities = getCityList();
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
-    const [gearData, userCity] = await Promise.all([
-      getAllGear(),
-      getUserCity(),
-    ]);
-    setCity(userCity);
-    if (gearData.length > 0 && !selectedGear) {
-      setSelectedGear(gearData[0].id);
-    }
-    setLoading(false);
-  };
-
-  const handleSaveCity = async () => {
-    setSaving(true);
-    await updateUserCity(city);
-    setSaving(false);
-  };
 
   if (loading) {
     return (
@@ -86,7 +57,7 @@ export default function Settings() {
               ))}
             </select>
             <button
-              onClick={handleSaveCity}
+              onClick={() => null}
               disabled={saving}
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center justify-center space-x-2"
             >
