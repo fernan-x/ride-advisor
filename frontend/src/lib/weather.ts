@@ -24,8 +24,10 @@ const CITY_COORDINATES: Record<string, { lat: number; lon: number }> = {
   Bordeaux: { lat: 44.8378, lon: -0.5792 },
 };
 
+export const DEFAULT_CITY = "Nantes";
+
 export async function fetchWeather(city: string): Promise<WeatherData> {
-  const coords = CITY_COORDINATES[city] || CITY_COORDINATES["Nantes"];
+  const coords = CITY_COORDINATES[city] || CITY_COORDINATES[DEFAULT_CITY];
 
   // Using Open-Meteo API (free, no API key required)
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,precipitation,relative_humidity_2m,wind_speed_10m&timezone=Europe/Paris`;
@@ -75,7 +77,7 @@ export async function fetchForecast(
   city: string,
   days: number = 7,
 ): Promise<DailyForecast[]> {
-  const coords = CITY_COORDINATES[city] || CITY_COORDINATES["Nantes"];
+  const coords = CITY_COORDINATES[city] || CITY_COORDINATES[DEFAULT_CITY];
 
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe/Paris&forecast_days=${days}`;
 

@@ -7,13 +7,12 @@ import {
   Droplets,
   RefreshCw,
 } from "lucide-react";
-import { fetchWeather, type WeatherData } from "../lib/weather";
-import { getUserCity } from "../lib/gearRecommendation";
+import { DEFAULT_CITY, fetchWeather, type WeatherData } from "../lib/weather";
 import { Gear } from "@/modules/gears/domain/gear.domain";
 
 export default function Dashboard() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [city, setCity] = useState<string>("Nantes");
+  const [city, _] = useState<string>(DEFAULT_CITY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const gear: Gear[] = [];
@@ -23,10 +22,7 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
 
-      const userCity = await getUserCity();
-      setCity(userCity);
-
-      const weatherData = await fetchWeather(userCity);
+      const weatherData = await fetchWeather(city);
       setWeather(weatherData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");

@@ -7,19 +7,15 @@ import {
   Droplets,
   RefreshCw,
 } from "lucide-react";
-import { fetchForecast, type DailyForecast } from "../lib/weather";
-import {
-  getUserCity,
-  getRecommendedGear,
-  type GearItem,
-} from "../lib/gearRecommendation";
+import { DEFAULT_CITY, fetchForecast, type DailyForecast } from "../lib/weather";
+import { Gear } from "@/modules/gears/domain/gear.domain";
 
 export default function Forecast() {
   const [forecast, setForecast] = useState<DailyForecast[]>([]);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [gear, setGear] = useState<GearItem[]>([]);
-  const [city, setCity] = useState<string>("Nantes");
-  const [loading, setLoading] = useState(true);
+  const [gear, _setGear] = useState<Gear[]>([]);
+  const [city, _setCity] = useState<string>(DEFAULT_CITY);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
@@ -27,15 +23,13 @@ export default function Forecast() {
       setLoading(true);
       setError(null);
 
-      const userCity = await getUserCity();
-      setCity(userCity);
-
-      const forecastData = await fetchForecast(userCity, 7);
+      const forecastData = await fetchForecast(city, 7);
       setForecast(forecastData);
 
       if (selectedDay !== null && forecastData[selectedDay]) {
         await loadGearForDay(forecastData[selectedDay]);
       }
+      setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load forecast");
     } finally {
@@ -52,8 +46,6 @@ export default function Forecast() {
       humidity: 0,
       windSpeed: 0,
     };
-    const recommendedGear = await getRecommendedGear(weatherData);
-    setGear(recommendedGear);
   };
 
   const handleDayClick = async (index: number) => {
