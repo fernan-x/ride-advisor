@@ -10,13 +10,15 @@ import {
 import { DEFAULT_CITY } from "@/modules/forecast/infrastructure/open-meteo-forecast.repository";
 import { useQueryForecast } from "@/modules/forecast/application/queries/useQueryForecast";
 import { Gear } from "@/modules/gears/domain/gear.domain";
+import { useMinimumLoadingTime } from "@/hooks/useMinimumLoadingTime";
 
 export default function Forecast() {
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [gear, _setGear] = useState<Gear[]>([]);
   const [city, _setCity] = useState<string>(DEFAULT_CITY);
 
-  const { data: forecast = [], isLoading, error, refetch } = useQueryForecast(city, 7);
+  const { data: forecast = [], isLoading, error, refetch, isFetching } = useQueryForecast(city, 7);
+  const isRefreshing = useMinimumLoadingTime(isFetching);
 
   const handleDayClick = (index: number) => {
     setSelectedDay(index);
@@ -65,7 +67,7 @@ export default function Forecast() {
             className="p-3 hover:bg-white rounded-lg transition-colors"
             title="Refresh"
           >
-            <RefreshCw className="w-6 h-6 text-gray-600" />
+            <RefreshCw className={`w-6 h-6 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
 
