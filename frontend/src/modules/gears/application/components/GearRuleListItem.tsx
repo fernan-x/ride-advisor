@@ -37,6 +37,8 @@ export const GearRuleListItem = ({ rule, gears }: GearRuleListItemProps) => {
         onConfirm={(rule: GearRule) => console.log("add rule", rule)}
         gearRule={rule}
         isLoading={isPending}
+        gears={gears}
+        gearsSelectDisabled
       />
       <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
         <span className="text-gray-700">{ruleDescription}</span>
