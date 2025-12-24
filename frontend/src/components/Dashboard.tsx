@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Cloud,
   CloudRain,
@@ -7,35 +7,17 @@ import {
   Droplets,
   RefreshCw,
 } from "lucide-react";
-import { DEFAULT_CITY, fetchWeather, type WeatherData } from "../lib/weather";
 import { Gear } from "@/modules/gears/domain/gear.domain";
+import { DEFAULT_CITY } from "@/modules/forecast/infrastructure/open-meteo-forecast.repository";
+import { useQueryCurrentWeather } from "@/modules/forecast/application";
 
 export default function Dashboard() {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
   const [city, _] = useState<string>(DEFAULT_CITY);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const gear: Gear[] = [];
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const { data: weather, isLoading, error, refetch } = useQueryCurrentWeather(city);
 
-      const weatherData = await fetchWeather(city);
-      setWeather(weatherData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
         <div className="text-center">
@@ -50,9 +32,9 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full">
-          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-red-600 mb-4">{error instanceof Error ? error.message : "Failed to load data"}</p>
           <button
-            onClick={loadData}
+            onClick={() => refetch()}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -84,7 +66,7 @@ export default function Dashboard() {
               Current Weather
             </h2>
             <button
-              onClick={loadData}
+              onClick={() => refetch()}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Refresh"
             >
