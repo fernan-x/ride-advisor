@@ -10,12 +10,14 @@ import {
 import { Gear } from "@/modules/gears/domain/gear.domain";
 import { DEFAULT_CITY } from "@/modules/forecast/infrastructure/open-meteo-forecast.repository";
 import { useQueryCurrentWeather } from "@/modules/forecast/application";
+import { useMinimumLoadingTime } from "@/hooks/useMinimumLoadingTime";
 
 export default function Dashboard() {
   const [city, _] = useState<string>(DEFAULT_CITY);
   const gear: Gear[] = [];
 
-  const { data: weather, isLoading, error, refetch } = useQueryCurrentWeather(city);
+  const { data: weather, isLoading, error, refetch, isFetching } = useQueryCurrentWeather(city);
+  const isRefreshing = useMinimumLoadingTime(isFetching);
 
   if (isLoading) {
     return (
@@ -70,7 +72,7 @@ export default function Dashboard() {
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="Refresh"
             >
-              <RefreshCw className="w-5 h-5 text-gray-600" />
+              <RefreshCw className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
