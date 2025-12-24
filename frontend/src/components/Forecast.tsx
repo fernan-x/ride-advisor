@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Calendar,
   CloudRain,
@@ -7,57 +7,22 @@ import {
   Droplets,
   RefreshCw,
 } from "lucide-react";
-import { DEFAULT_CITY, fetchForecast, type DailyForecast } from "../lib/weather";
+import { DEFAULT_CITY } from "@/modules/forecast/infrastructure/open-meteo-forecast.repository";
+import { useQueryForecast } from "@/modules/forecast/application/queries/useQueryForecast";
 import { Gear } from "@/modules/gears/domain/gear.domain";
 
 export default function Forecast() {
-  const [forecast, setForecast] = useState<DailyForecast[]>([]);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [gear, _setGear] = useState<Gear[]>([]);
   const [city, _setCity] = useState<string>(DEFAULT_CITY);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const { data: forecast = [], isLoading, error, refetch } = useQueryForecast(city, 7);
 
-      const forecastData = await fetchForecast(city, 7);
-      setForecast(forecastData);
-
-      if (selectedDay !== null && forecastData[selectedDay]) {
-        await loadGearForDay(forecastData[selectedDay]);
-      }
-      setLoading(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load forecast");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadGearForDay = async (day: DailyForecast) => {
-    const avgTemp = (day.tempMax + day.tempMin) / 2;
-    const weatherData = {
-      temperature: Math.round(avgTemp),
-      isRaining: day.isRaining,
-      description: day.description,
-      humidity: 0,
-      windSpeed: 0,
-    };
-  };
-
-  const handleDayClick = async (index: number) => {
+  const handleDayClick = (index: number) => {
     setSelectedDay(index);
-    await loadGearForDay(forecast[index]);
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="h-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
         <div className="text-center">
@@ -72,9 +37,9 @@ export default function Forecast() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full">
-          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-red-600 mb-4">{error instanceof Error ? error.message : "Failed to load forecast"}</p>
           <button
-            onClick={loadData}
+            onClick={() => refetch()}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -96,7 +61,7 @@ export default function Forecast() {
             <p className="text-gray-600">Weather forecast for {city}</p>
           </div>
           <button
-            onClick={loadData}
+            onClick={() => refetch()}
             className="p-3 hover:bg-white rounded-lg transition-colors"
             title="Refresh"
           >
