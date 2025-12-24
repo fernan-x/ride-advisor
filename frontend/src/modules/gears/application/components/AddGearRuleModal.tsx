@@ -12,36 +12,41 @@ import {
 import { useForm } from "@mantine/form";
 import { GearRule } from "../../domain/gear-rule.domain";
 
+import { Gear } from "../../domain/gear.domain";
 export type AddGearRuleModalProps = {
-  gearRule: GearRule;
+  gearRule: GearRule | null;
   show: boolean;
   onClose: () => void;
   onConfirm: (rule: GearRule) => void;
   isLoading?: boolean;
+  gears: Gear[];
+  gearsSelectDisabled?: boolean;
 };
 export const AddGearRuleModal = ({
   show,
   onClose,
   onConfirm,
   gearRule,
+  gears = [],
   isLoading = false,
+  gearsSelectDisabled = false,
 }: AddGearRuleModalProps) => {
   const form = useForm({
     initialValues: {
       minTemperature: gearRule?.minTemperature ?? undefined,
       maxTemperature: gearRule?.maxTemperature ?? undefined,
       rainCondition:
-        (gearRule?.rainCondition as GearRule["rainCondition"]) ?? "all",
+        (gearRule?.rainCondition) ?? "all",
       gearId: gearRule?.gearId ?? "",
     },
     validate: {
-      gearId: (value) => (!value ? "Please select a gear" : null),
-      rainCondition: (value) => (!value ? "Please choose a condition" : null),
+      gearId: (value) => (!value ? "Veuillez sélectionner un équipement" : null),
+      rainCondition: (value) => (!value ? "Veuillez choisir une condition" : null),
       maxTemperature: (value, values) =>
         value != null &&
         values.minTemperature != null &&
         value < values.minTemperature
-          ? "Max must be greater than or equal to min"
+          ? "La température max doit être supérieure ou égale à la température min"
           : null,
     },
     transformValues: (values) => ({
@@ -65,7 +70,7 @@ export const AddGearRuleModal = ({
       id: gearRule?.id ?? id,
       minTemperature: values.minTemperature,
       maxTemperature: values.maxTemperature,
-      rainCondition: values.rainCondition as GearRule["rainCondition"],
+      rainCondition: values.rainCondition,
       gearId: values.gearId,
     };
 
@@ -74,7 +79,7 @@ export const AddGearRuleModal = ({
     form.reset();
   });
 
-  const gearOptions = undefined;
+  const gearOptions = gears.map((gear) => ({ value: gear.id, label: gear.name }));
 
   return (
     <Modal
@@ -88,20 +93,22 @@ export const AddGearRuleModal = ({
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           <div>
-            <InputLabel>Gear</InputLabel>
+            <InputLabel>Équipement</InputLabel>
             <Select
-              placeholder="Pick a gear"
+              placeholder="Choisissez un équipement"
               data={gearOptions}
               {...form.getInputProps("gearId")}
               radius="md"
               searchable
               clearable
+              nothingFoundMessage="Aucun équipement disponible"
+              disabled={gearsSelectDisabled}
             />
           </div>
 
           <Group grow align="flex-end">
             <NumberInput
-              label="Min temperature (°C)"
+              label="Température min (°C)"
               placeholder="e.g. 5"
               allowDecimal={false}
               min={-50}
@@ -110,7 +117,7 @@ export const AddGearRuleModal = ({
               radius="md"
             />
             <NumberInput
-              label="Max temperature (°C)"
+              label="Température max (°C)"
               placeholder="e.g. 18"
               allowDecimal={false}
               min={-50}
@@ -121,18 +128,18 @@ export const AddGearRuleModal = ({
           </Group>
 
           <div>
-            <InputLabel>Rain condition</InputLabel>
+            <InputLabel>Condition de pluie</InputLabel>
             <Select
               data={[
-                { value: "all", label: "All" },
-                { value: "wet", label: "Wet / Rainy" },
-                { value: "dry", label: "Dry" },
+                { value: "all", label: "Tous" },
+                { value: "wet", label: "Humide / Pluvieux" },
+                { value: "dry", label: "Sec" },
               ]}
               {...form.getInputProps("rainCondition")}
               radius="md"
             />
             <Text size="xs" c="dimmed" mt={4}>
-              Use <b>All</b> if this rule applies regardless of precipitation.
+              Utilisez <b>Tous</b> si cette règle s'applique indépendamment des précipitations.
             </Text>
           </div>
 
@@ -140,11 +147,11 @@ export const AddGearRuleModal = ({
 
           <Group justify="space-between">
             <Button variant="subtle" onClick={() => form.reset()} radius="md">
-              Reset
+              Réinitialiser
             </Button>
             <Group>
               <Button variant="default" onClick={onClose} radius="md">
-                Cancel
+                Annuler
               </Button>
               <Button
                 type="submit"
@@ -152,7 +159,7 @@ export const AddGearRuleModal = ({
                 radius="md"
                 loading={isLoading}
               >
-                Save rule
+                Enregistrer la règle
               </Button>
             </Group>
           </Group>

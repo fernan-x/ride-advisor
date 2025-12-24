@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Save, MapPin } from "lucide-react";
 import { DEFAULT_CITY, getCityList } from "../lib/weather";
 import { GearList } from "../modules/gears/application/components/GearList";
